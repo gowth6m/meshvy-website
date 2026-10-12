@@ -23,7 +23,12 @@ export default function Hero() {
     //
     // `isolate` so the backdrop can sit at a negative z-index without falling
     // behind the canvas grid that the whole page is drawn on.
-    <section className="relative isolate overflow-hidden pt-32 pb-16 md:pt-40 md:pb-24">
+    //
+    // Clipped on x only: the haze and the mesh are both wider than a narrow
+    // window and would otherwise push the page sideways, but `overflow-hidden`
+    // clips the y axis too, and it sheared the bloom under the board off at a
+    // hard line. `clip` leaves the other axis visible, which `hidden` cannot.
+    <section className="relative isolate overflow-x-clip pt-32 pb-16 md:pt-40 md:pb-24">
       {/*
         The backdrop: the app's own canvas, live. Nodes in the margins, edges
         drawing themselves in as the page lands, and work moving along them.
