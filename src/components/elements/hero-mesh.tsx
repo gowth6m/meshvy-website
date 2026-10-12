@@ -14,8 +14,8 @@ type Point = readonly [number, number]
   bare points, because a rectangle is something somebody built.
 
   The two clusters are not mirrors of each other. A real board is whatever you
-  dragged onto it, so the left is a five-node ladder and the right is a shorter
-  zigzag, on their own rows, at their own widths, drifting on their own clocks.
+  dragged onto it, so the left is an eight-node wander and the right a seven-node
+  one, on their own rows, at their own widths, drifting on their own clocks.
   Nothing here tracks the pointer: the backdrop is scenery, and scenery that
   lunges at the cursor pulls the eye off the headline it sits behind.
 
@@ -33,23 +33,41 @@ type Point = readonly [number, number]
 const MESH_WIDTH = 1200
 const MESH_HEIGHT = 820
 
-const CARD_H = 32
+const CARD_H = 22
 
 /*
-  Rows sit inside y 156..640, the band that survives the vertical crop out to a
-  1920-wide viewport. Widths vary because nine identical rectangles read as a
-  pattern, and a pattern reads as wallpaper.
+  Rows sit inside y 157..574, the band that survives the vertical crop out to a
+  1920-wide viewport.
+
+  Cards are deliberately small — 22 user units tall, a third under what reads
+  comfortably as a UI panel. That is the point: a board you are looking at from
+  far enough away to see all of it, which is both why fifteen of them fit in the
+  margins and why none of them competes with the type in the middle.
+
+  Nothing here lines up. No two cards share a column, no two vertical gaps are
+  equal, and the widths are all different, because the one thing that would give
+  away that nobody dragged these is a grid — fifteen rectangles on a lattice read
+  as wallpaper, and wallpaper is a texture rather than somebody's workspace. The
+  numbers are hand-placed rather than generated: a random seed scatters just as
+  happily into a clump or off the edge, and these have to stay inside the margins
+  the mask leaves open.
 */
 const nodes = {
-  l1: { x: 66, y: 196, w: 56 },
-  l2: { x: 240, y: 300, w: 50 },
-  l3: { x: 66, y: 378, w: 48 },
-  l4: { x: 262, y: 492, w: 58 },
-  l5: { x: 66, y: 582, w: 52 },
-  r1: { x: 1150, y: 172, w: 54 },
-  r2: { x: 986, y: 268, w: 48 },
-  r3: { x: 1108, y: 394, w: 60 },
-  r4: { x: 944, y: 512, w: 46 },
+  l1: { x: 72, y: 170, w: 40 },
+  l2: { x: 216, y: 204, w: 32 },
+  l3: { x: 44, y: 256, w: 36 },
+  l4: { x: 178, y: 312, w: 44 },
+  l5: { x: 92, y: 352, w: 30 },
+  l6: { x: 248, y: 420, w: 38 },
+  l7: { x: 50, y: 468, w: 42 },
+  l8: { x: 194, y: 552, w: 34 },
+  r1: { x: 1136, y: 168, w: 38 },
+  r2: { x: 968, y: 198, w: 32 },
+  r3: { x: 1102, y: 262, w: 44 },
+  r4: { x: 1162, y: 336, w: 34 },
+  r5: { x: 1012, y: 388, w: 40 },
+  r6: { x: 1118, y: 452, w: 32 },
+  r7: { x: 990, y: 534, w: 42 },
 } satisfies Record<string, { x: number; y: number; w: number }>
 
 type NodeId = keyof typeof nodes
@@ -70,25 +88,48 @@ function port(id: NodeId, side: Side): Point {
   off the halfway point so that wires sharing a lane do not stack into one long
   dashed-looking line. Corners are quadratics, radius clamped to the shorter leg
   so a tight route cannot overshoot its own turn.
+
+  A wire leaving a top or bottom port has to do the same thing on the other axis
+  — down out of the card, one horizontal run, down into the next — and `vertical`
+  asks for that. It used to be free: stacked nodes shared a column, so the route
+  was a straight line and nobody had to decide which way it left the card. Once
+  the column went, a horizontal-first route out of a bottom edge read as a wire
+  sliding along the underside of the card. So the whole thing is solved with the
+  axes swapped and every point swapped back on the way out — `flip` is its own
+  inverse, which is what lets one body serve both directions.
 */
-function wirePath([x1, y1]: Point, [x2, y2]: Point, mid = 0, r = 13) {
-  const lane = (x1 + x2) / 2 + mid
-  const dx = Math.sign(lane - x1) || 1
-  const dy = Math.sign(y2 - y1)
-  if (dy === 0) return `M${x1} ${y1} L${x2} ${y2}`
+function wirePath(
+  [x1, y1]: Point,
+  [x2, y2]: Point,
+  mid = 0,
+  vertical = false,
+  r = 10
+) {
+  const flip = (a: number, b: number): Point => (vertical ? [b, a] : [a, b])
+  const [u1, v1] = flip(x1, y1)
+  const [u2, v2] = flip(x2, y2)
+  const at = (u: number, v: number) =>
+    flip(u, v)
+      .map((n) => +n.toFixed(1))
+      .join(" ")
+
+  const lane = (u1 + u2) / 2 + mid
+  const du = Math.sign(lane - u1) || 1
+  const dv = Math.sign(v2 - v1)
+  if (dv === 0) return `M${at(u1, v1)} L${at(u2, v2)}`
   const rr = Math.min(
     r,
-    Math.abs(lane - x1),
-    Math.abs(x2 - lane),
-    Math.abs(y2 - y1) / 2
+    Math.abs(lane - u1),
+    Math.abs(u2 - lane),
+    Math.abs(v2 - v1) / 2
   )
   return [
-    `M${x1} ${y1}`,
-    `L${(lane - dx * rr).toFixed(1)} ${y1}`,
-    `Q${lane} ${y1} ${lane} ${(y1 + dy * rr).toFixed(1)}`,
-    `L${lane} ${(y2 - dy * rr).toFixed(1)}`,
-    `Q${lane} ${y2} ${(lane + dx * rr).toFixed(1)} ${y2}`,
-    `L${x2} ${y2}`,
+    `M${at(u1, v1)}`,
+    `L${at(lane - du * rr, v1)}`,
+    `Q${at(lane, v1)} ${at(lane, v1 + dv * rr)}`,
+    `L${at(lane, v2 - dv * rr)}`,
+    `Q${at(lane, v2)} ${at(lane + du * rr, v2)}`,
+    `L${at(u2, v2)}`,
   ].join(" ")
 }
 
@@ -109,32 +150,43 @@ const clusters: {
   wires: Wire[]
 }[] = [
   {
-    // A ladder: a spine down the outer column, rungs across into the inner one.
+    // A chain working its way down the margin, doubling back on itself twice.
+    // The spine is still there — l1 to l3 to l5 to l7 — but it steps sideways
+    // at every link now, which is what a spine looks like when the nodes it
+    // runs through were dropped by hand.
     id: "left",
-    nodes: ["l1", "l2", "l3", "l4", "l5"],
+    nodes: ["l1", "l2", "l3", "l4", "l5", "l6", "l7", "l8"],
     drift: 19,
     delay: -3,
     wires: [
       { from: ["l1", "b"], to: ["l3", "t"] },
       { from: ["l3", "b"], to: ["l5", "t"] },
-      { from: ["l1", "r"], to: ["l2", "l"], signal: 3.4, at: 0.9 },
-      { from: ["l3", "r"], to: ["l2", "l"], mid: -24, signal: 4.6, at: 2.4 },
-      { from: ["l3", "r"], to: ["l4", "l"], mid: 16 },
-      { from: ["l5", "r"], to: ["l4", "l"], mid: -9, signal: 3.9, at: 1.6 },
+      { from: ["l5", "b"], to: ["l7", "t"] },
+      { from: ["l1", "r"], to: ["l2", "l"], mid: 10, signal: 3.4, at: 0.9 },
+      { from: ["l3", "r"], to: ["l2", "l"], mid: -16 },
+      { from: ["l5", "r"], to: ["l4", "l"], signal: 3.9, at: 1.6 },
+      { from: ["l4", "r"], to: ["l6", "l"], mid: 4 },
+      { from: ["l7", "r"], to: ["l6", "l"], mid: 18, signal: 4.6, at: 3.1 },
+      { from: ["l7", "r"], to: ["l8", "l"], mid: -14 },
     ],
   },
   {
-    // A zigzag: one chain stepping down the margin, with a single shortcut
-    // across it. Four nodes to the left's five, and none of them on its rows.
+    // The same idea with a different hand: a chain that crosses its own column
+    // twice, plus two shortcuts cutting down past it. Seven nodes to the left's
+    // eight, and not one of them on a row the left uses.
     id: "right",
-    nodes: ["r1", "r2", "r3", "r4"],
+    nodes: ["r1", "r2", "r3", "r4", "r5", "r6", "r7"],
     drift: 26,
     delay: -11,
     wires: [
       { from: ["r1", "l"], to: ["r2", "r"], signal: 4.2, at: 1.3 },
-      { from: ["r2", "r"], to: ["r3", "l"], mid: 14, signal: 5.1, at: 3.4 },
-      { from: ["r3", "l"], to: ["r4", "r"], signal: 3.7, at: 0.5 },
-      { from: ["r1", "b"], to: ["r3", "t"], mid: -8 },
+      { from: ["r2", "r"], to: ["r3", "l"], mid: 12 },
+      { from: ["r3", "r"], to: ["r4", "l"], mid: -4 },
+      { from: ["r4", "l"], to: ["r5", "r"], signal: 3.7, at: 0.5 },
+      { from: ["r5", "r"], to: ["r6", "l"], mid: 8 },
+      { from: ["r6", "b"], to: ["r7", "t"], signal: 5.1, at: 2.6 },
+      { from: ["r1", "b"], to: ["r4", "t"], mid: -14 },
+      { from: ["r2", "b"], to: ["r5", "t"], mid: -22 },
     ],
   },
 ]
@@ -144,14 +196,24 @@ const routed = clusters.map((cluster) => ({
   wires: cluster.wires.map((wire) => ({
     ...wire,
     key: `${wire.from.join("")}-${wire.to.join("")}`,
-    d: wirePath(port(...wire.from), port(...wire.to), wire.mid),
+    // The port the wire leaves by decides which axis it runs on first — there
+    // is no second thing to configure, and no way to ask for the route that
+    // slides along the edge of its own card.
+    d: wirePath(
+      port(...wire.from),
+      port(...wire.to),
+      wire.mid,
+      wire.from[1] === "t" || wire.from[1] === "b"
+    ),
   })),
 }))
 
-// Two of the nine are live sessions. The rest are idle, which is what makes the
-// mint ones mean something. They sit in different slots on each side, so the
-// eye does not pair them off.
-const live: NodeId[] = ["l2", "r3"]
+// Three of the fifteen are live sessions. The rest are idle, which is what
+// makes the mint ones mean something — the ratio stays roughly what it was at
+// nine nodes, because a board where most things are running is a board nobody
+// believes. They sit in different columns and different rows, so the eye does
+// not pair them off.
+const live: NodeId[] = ["l2", "r3", "r5"]
 
 /** A node on the board: a panel with a status dot, a title bar, and two body lines. */
 function Card({ id, index }: { id: NodeId; index: number }) {
@@ -162,65 +224,81 @@ function Card({ id, index }: { id: NodeId; index: number }) {
   return (
     <g
       className="animate-node-in motion-reduce:animate-none"
-      style={{ animationDelay: `${260 + index * 90}ms` }}
+      style={{ animationDelay: `${260 + index * 70}ms` }}
     >
-      {isLive && <circle cx={x} cy={y} r="56" fill="url(#mesh-halo)" />}
+      {isLive && <circle cx={x} cy={y} r="40" fill="url(#mesh-halo)" />}
+      {/*
+        The fill is translucent rather than flat panel: the canvas dots carry
+        on through the card, so it reads as something drawn on the background
+        instead of a chip laid over it. A live node's mint outline is pulled
+        back too — at full strength it was the brightest thing on the screen,
+        and the brightest thing on the screen should be the headline.
+      */}
       <rect
         x={left}
         y={top}
         width={w}
         height={CARD_H}
-        rx="6"
+        rx="4"
         fill="var(--color-panel)"
+        fillOpacity="0.55"
         stroke={isLive ? "var(--color-mint)" : "var(--color-hair)"}
+        strokeOpacity={isLive ? 0.4 : 1}
         strokeWidth="1.25"
       />
-      {/* The title-bar rule, which is what makes a rectangle read as a panel. */}
+      {/*
+        The title-bar rule, which is what makes a rectangle read as a panel —
+        and the first thing to protect when the panel shrinks. Everything below
+        is sized off a 22-unit card: an 8-unit title strip, a 2-unit dot, and
+        two body lines in the 14 that remain. Shrink the card again and these
+        want shrinking with it, which is why they sit in one block.
+      */}
       <line
         x1={left}
-        y1={top + 11}
+        y1={top + 8}
         x2={left + w}
-        y2={top + 11}
+        y2={top + 8}
         stroke="var(--color-hair)"
         strokeWidth="1"
       />
       <circle
-        cx={left + 8}
-        cy={top + 5.5}
-        r="2.2"
+        cx={left + 5.5}
+        cy={top + 4}
+        r="1.6"
         fill={isLive ? "var(--color-mint)" : "var(--color-hair)"}
+        fillOpacity={isLive ? 0.6 : 1}
         className={cn(
           isLive && "animate-pulse-node motion-reduce:animate-none"
         )}
         style={
           isLive
-            ? { transformOrigin: `${left + 8}px ${top + 5.5}px` }
+            ? { transformOrigin: `${left + 5.5}px ${top + 4}px` }
             : undefined
         }
       />
       <rect
-        x={left + 15}
-        y={top + 4}
-        width={w - 28}
-        height="3"
-        rx="1.5"
+        x={left + 10}
+        y={top + 3}
+        width={w - 18}
+        height="2.2"
+        rx="1.1"
         fill="var(--color-hair)"
       />
       <rect
-        x={left + 8}
-        y={top + 17}
-        width={w - 22}
-        height="2.5"
-        rx="1.25"
+        x={left + 5.5}
+        y={top + 11.5}
+        width={w - 14}
+        height="2"
+        rx="1"
         fill="var(--color-hair)"
         opacity="0.75"
       />
       <rect
-        x={left + 8}
-        y={top + 24}
-        width={(w - 22) * 0.6}
-        height="2.5"
-        rx="1.25"
+        x={left + 5.5}
+        y={top + 15.5}
+        width={(w - 14) * 0.6}
+        height="2"
+        rx="1"
         fill="var(--color-hair)"
         opacity="0.75"
       />
@@ -232,7 +310,13 @@ export default function HeroMesh({ className }: { className?: string }) {
   return (
     <div
       aria-hidden="true"
-      className={cn("pointer-events-none select-none", className)}
+      /*
+        Scenery, held at scenery's level. The whole mesh is dimmed as one piece
+        rather than per element, so the board keeps its internal contrast — a
+        live node still outranks an idle one — while the entire thing sits a
+        tier below the type it runs behind.
+      */
+      className={cn("pointer-events-none opacity-55 select-none", className)}
       style={{
         /*
           The centre is cut out of the mask so no wire ever crosses the
@@ -256,7 +340,7 @@ export default function HeroMesh({ className }: { className?: string }) {
             <stop
               offset="0%"
               stopColor="var(--color-mint)"
-              stopOpacity="0.32"
+              stopOpacity="0.16"
             />
             <stop offset="100%" stopColor="var(--color-mint)" stopOpacity="0" />
           </radialGradient>
@@ -306,7 +390,12 @@ export default function HeroMesh({ className }: { className?: string }) {
               {cluster.wires
                 .filter((wire) => wire.signal)
                 .map(({ key, d, signal, at }) => (
-                  <circle key={key} r="3" fill="var(--color-mint)">
+                  <circle
+                    key={key}
+                    r="2.4"
+                    fill="var(--color-mint)"
+                    fillOpacity="0.5"
+                  >
                     <animateMotion
                       dur={`${signal}s`}
                       begin={`${at}s`}
