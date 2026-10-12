@@ -1,0 +1,86 @@
+import Mark from "@/components/brand/mark"
+import { site } from "@/lib/site"
+import { externalLink } from "@/lib/utils"
+
+const columns = [
+  {
+    heading: "Meshvy",
+    links: [
+      { label: "The model", href: "#model" },
+      { label: "Delegation", href: "#delegation" },
+      { label: "The board", href: "#board" },
+      { label: "Safety", href: "#safety" },
+      { label: "Install", href: "#install" },
+    ],
+  },
+  {
+    heading: "Source",
+    links: [
+      { label: "GitHub", href: site.repo, external: true },
+      { label: "Releases", href: site.releases, external: true },
+      { label: "Licence", href: site.licence, external: true },
+    ],
+  },
+  {
+    heading: "Needs",
+    links: [{ label: "Claude Code", href: site.claudeCode, external: true }],
+  },
+]
+
+export default function Footer() {
+  return (
+    <footer className="border-t border-hair">
+      <div className="container py-14 md:py-16">
+        <div className="grid gap-12 md:grid-cols-[1.4fr_repeat(3,minmax(0,0.6fr))] md:gap-8">
+          <div className="max-w-xs">
+            <Mark className="size-7" />
+            <p className="mt-5 text-sm text-slate">
+              A native macOS app for running coding agents across several
+              repositories at once, on an infinite canvas.
+            </p>
+          </div>
+
+          {columns.map((column) => (
+            <nav key={column.heading} aria-label={column.heading}>
+              {/* The same label as every eyebrow; font-normal undoes the base h2 weight. */}
+              <h2 className="eyebrow font-normal">{column.heading}</h2>
+              <ul className="mt-4 space-y-2.5">
+                {column.links.map((link) => (
+                  <li key={link.label}>
+                    <a
+                      href={link.href}
+                      {...("external" in link && link.external
+                        ? externalLink(link.label)
+                        : {})}
+                      className="rounded-sm text-sm text-slate transition-colors hover:text-paper focus-visible:ring-2 focus-visible:ring-mint focus-visible:outline-none"
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          ))}
+        </div>
+
+        <div className="mt-14 flex flex-col gap-4 border-t border-hair pt-8 text-xs text-slate md:flex-row md:items-start md:justify-between">
+          <p className="max-w-2xl">
+            Source-available, not open source. You may run Meshvy and fork or
+            modify it for your own use, including at work — you may not
+            redistribute it or offer it to others as a service. The terminal
+            emulator,{" "}
+            <a
+              href="https://github.com/migueldeicaza/SwiftTerm"
+              {...externalLink("SwiftTerm")}
+              className="text-paper/80 underline decoration-hair underline-offset-4 hover:decoration-slate"
+            >
+              SwiftTerm
+            </a>
+            , is MIT-licensed by its own authors.
+          </p>
+          <p className="shrink-0 font-mono">Built by {site.author}</p>
+        </div>
+      </div>
+    </footer>
+  )
+}

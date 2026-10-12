@@ -1,0 +1,290 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/*
+  Meshvy's palette is not invented here — it is the brand mark's own three
+  colours, which are Night Owl's: #011627 behind everything, #D6DEEB for type,
+  and #64FFDA on the one node in the middle of the M. The surfaces between void
+  and hairline are steps along that same navy, so a screenshot of the app
+  dropped onto the page belongs there rather than floating on a background
+  that fights it.
+
+  Two accents, and only two. Mint is the brand and anything live, clean or
+  actionable; sand is a string — a branch name, a path you would type.
+*/
+@theme {
+  --color-void: #011627; /* the canvas itself */
+  --color-panel: #082438; /* a node on the canvas */
+  --color-raised: #0e3047; /* a well inside a node */
+  --color-hair: #1d3b53; /* hairlines, borders, edges */
+  --color-mint: #64ffda; /* the mark's centre node — the primary */
+  --color-sand: #ecc48d; /* a branch name, a string */
+  --color-paper: #d6deeb; /* body copy */
+  --color-slate: #7e97b3; /* everything secondary */
+
+  --font-display: var(--font-host-grotesk);
+  --font-text: var(--font-host-grotesk);
+  --font-mono: var(--font-jetbrains-mono);
+
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-swift: cubic-bezier(0.77, 0, 0.175, 1);
+
+  --animate-draw: draw 1.4s var(--ease-soft) both;
+  --animate-pulse-node: pulse-node 3.2s var(--ease-soft) infinite;
+
+  @keyframes draw {
+    from {
+      stroke-dashoffset: 1;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  @keyframes pulse-node {
+    0%,
+    100% {
+      opacity: 0.35;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.9;
+      transform: scale(1.35);
+    }
+  }
+}
+
+@theme inline {
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.4);
+}
+
+:root {
+  --background: var(--color-void);
+  --foreground: var(--color-paper);
+  --card: var(--color-panel);
+  --card-foreground: var(--color-paper);
+  --popover: var(--color-panel);
+  --popover-foreground: var(--color-paper);
+  /* Mint carries the primary action, with the void back on top of it — the
+     app-icon's own pairing, and the highest-contrast thing on the page. */
+  --primary: var(--color-mint);
+  --primary-foreground: var(--color-void);
+  --secondary: var(--color-raised);
+  --secondary-foreground: var(--color-paper);
+  --muted: var(--color-raised);
+  --muted-foreground: var(--color-slate);
+  --accent: var(--color-raised);
+  --accent-foreground: var(--color-paper);
+  --destructive: #e5736b;
+  --border: var(--color-hair);
+  --input: #27496a;
+  --ring: var(--color-mint);
+  --radius: 0.625rem;
+}
+
+/* The nav pill's geometry, kept in one place so the bar and the space the hero
+   leaves for it can never drift apart. */
+:root {
+  --nav-top: 0.75rem;
+  --nav-height: 3.5rem;
+  --nav-max-width: 54rem;
+  --nav-inset: 0.75rem;
+  @media (width >= 48rem) {
+    --nav-top: 1rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/60;
+  }
+  html {
+    @apply scroll-pt-24 motion-safe:scroll-smooth;
+    color-scheme: dark;
+    /* The parts the browser draws take the palette too: the scrollbar on a
+       code node, the caret and selection, any native control. */
+    scrollbar-color: var(--color-hair) transparent;
+    accent-color: var(--color-mint);
+    caret-color: var(--color-mint);
+  }
+  body {
+    @apply bg-background font-text text-foreground antialiased;
+    font-size: 1rem;
+    line-height: 1.65;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display text-balance;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+  }
+  /* Sized so the headline sets in two lines from the tablet breakpoint up and
+     leaves the first screen to the board, which is the thing being sold. The
+     +1rem term keeps it from collapsing on a narrow window the way a pure vw
+     ramp does. */
+  h1 {
+    font-size: clamp(2.5rem, 4vw + 1rem, 5.5rem);
+    line-height: 0.96;
+    letter-spacing: -0.04em;
+  }
+  h2 {
+    font-size: clamp(1.9rem, 3.6vw, 3rem);
+    line-height: 1.04;
+    letter-spacing: -0.035em;
+  }
+  h3 {
+    font-size: 1.1875rem;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+  }
+  p {
+    @apply text-pretty;
+  }
+  ::selection {
+    background: var(--color-mint);
+    color: var(--color-void);
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+@layer components {
+  /*
+    The page's one structural idea: everything sits on the same canvas the app
+    draws. The grid is the app's own dot field, kept faint enough that it reads
+    as paper texture until a node lands on top of it.
+  */
+  .canvas {
+    background-image: radial-gradient(
+      circle at 1px 1px,
+      color-mix(in oklab, var(--color-slate) 17%, transparent) 1px,
+      transparent 0
+    );
+    background-size: 28px 28px;
+    background-position: -1px -1px;
+  }
+
+  /* A node: the app's card chrome, one step above the canvas on a hairline. */
+  .node {
+    @apply relative rounded-xl border border-hair bg-panel;
+    box-shadow:
+      0 1px 0 0 color-mix(in oklab, #fff 5%, transparent) inset,
+      0 24px 60px -24px #000;
+  }
+
+  /* A node's title bar — the strip the app puts a name and a branch chip in. */
+  .node-bar {
+    @apply flex items-center gap-2.5 border-b border-hair px-4 py-2.5;
+  }
+}
+
+@layer utilities {
+  .section-padding {
+    @apply py-20 md:py-24 lg:py-32;
+  }
+
+  /* The interval between a section's heading and its content — the tier the
+     page was missing. Sections sit 256px apart and groups inside them sat at
+     40-56px, so everything within a section read as one block. */
+  .heading-gap {
+    @apply mt-14 md:mt-20;
+  }
+
+  /* The eyebrow is mono because every label in the app is. */
+  .eyebrow {
+    @apply inline-flex items-center gap-2 font-mono text-[0.6875rem] tracking-[0.16em] text-slate uppercase;
+  }
+
+  /* Terminal and git type: branches, paths, counts, keys, commands. */
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-md border border-hair bg-raised px-2 py-0.5 font-mono text-xs;
+  }
+
+  .figures {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* The mint bloom under a board, as if the canvas were lit from beneath it.
+     It goes on a wrapper, never on the node itself — a node clips its own
+     overflow — and it spills past the bottom edge, because a glow behind an
+     opaque screenshot is a glow nobody sees. */
+  .bloom {
+    position: relative;
+  }
+  .bloom::before {
+    content: "";
+    position: absolute;
+    inset: 35% -4% -14%;
+    background: radial-gradient(
+      ellipse 58% 62% at 50% 72%,
+      color-mix(in oklab, var(--color-mint) 22%, transparent),
+      transparent 70%
+    );
+    filter: blur(64px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* CSS so the hero's entrance begins on first paint, before hydration. */
+  .enter {
+    @apply animate-in duration-700 ease-soft fill-mode-both fade-in slide-in-from-bottom-3 motion-reduce:slide-in-from-bottom-0;
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility container {
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+  @media (width >= 48rem) {
+    padding-inline: 2rem;
+  }
+  @media (width >= 64rem) {
+    padding-inline: 2.5rem;
+    max-width: 78rem;
+  }
+}
+
+@utility wide-container {
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+  @media (width >= 48rem) {
+    padding-inline: 2rem;
+  }
+  @media (width >= 64rem) {
+    padding-inline: 2.5rem;
+    max-width: 92rem;
+  }
+}
