@@ -78,7 +78,16 @@ export default function Footer() {
             </a>
             , is MIT-licensed by its own authors.
           </p>
-          <p className="shrink-0 font-mono">Built by {site.author}</p>
+          <p className="shrink-0 font-mono">
+            Built by{" "}
+            <a
+              href={site.authorUrl}
+              {...externalLink(site.author)}
+              className="rounded-sm text-paper/80 underline decoration-hair underline-offset-4 transition-colors hover:text-paper hover:decoration-slate focus-visible:ring-2 focus-visible:ring-mint focus-visible:outline-none"
+            >
+              {site.author}
+            </a>
+          </p>
         </div>
       </div>
     </footer>

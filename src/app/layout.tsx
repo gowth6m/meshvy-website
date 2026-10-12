@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     "macOS developer tools",
     "agent orchestration",
   ],
-  authors: [{ name: site.author, url: site.repo }],
+  authors: [{ name: site.author, url: site.authorUrl }],
   creator: site.author,
   robots: { index: true, follow: true },
   icons: {

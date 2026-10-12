@@ -9,7 +9,6 @@ import Install from "@/components/sections/install"
 import Model from "@/components/sections/model"
 import Safety from "@/components/sections/safety"
 import Shortcuts from "@/components/sections/shortcuts"
-import Speed from "@/components/sections/speed"
 import { pageMetadata } from "@/lib/metadata"
 
 export const metadata: Metadata = pageMetadata({ path: "/" })
@@ -24,7 +23,6 @@ export default function Home() {
         <Model />
         <Delegation />
         <Board />
-        <Speed />
         <Safety />
         <Shortcuts />
         <Install />

@@ -5,6 +5,7 @@ export const site = {
     "A native macOS app for running coding agents across several repositories at once. Meshvy cuts one branch across the repos you pick, checks each out side by side, and puts a real Claude Code session — with its own terminal — on every one of them.",
   url: siteUrl(),
   author: "Gowtham Ravindrathas",
+  authorUrl: "https://gowtham.io",
   platform: "macOS 14+",
   owner: "gowth6m",
   repoName: "meshvy",
