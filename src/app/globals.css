@@ -130,6 +130,12 @@
 }
 
 @theme inline {
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -178,6 +184,14 @@
   --input: #27496a;
   --ring: var(--color-mint);
   --radius: 0.625rem;
+  /* The docs sidebar is a panel on the canvas, like a node in the app: one
+     step up from the void it sits on, divided from it by a hairline. */
+  --sidebar: var(--color-panel);
+  --sidebar-foreground: var(--color-paper);
+  --sidebar-accent: var(--color-raised);
+  --sidebar-accent-foreground: var(--color-paper);
+  --sidebar-border: var(--color-hair);
+  --sidebar-ring: var(--color-mint);
 }
 
 /* The nav pill's geometry, kept in one place so the bar and the space the hero
@@ -277,6 +291,58 @@
   /* A node's title bar — the strip the app puts a name and a branch chip in. */
   .node-bar {
     @apply flex items-center gap-2.5 border-b border-hair px-4 py-2.5;
+  }
+}
+
+@layer components {
+  /*
+    The docs' running text. Headings carry scroll-mt so an anchored jump
+    clears the sticky header, and the vertical rhythm is set here rather than
+    on every element in every page.
+  */
+  .docs-prose {
+    @apply text-[0.9375rem] leading-[1.75] text-slate;
+
+    & h2 {
+      @apply mt-14 scroll-mt-24 font-display text-[1.5rem] leading-[1.2] font-semibold tracking-[-0.03em] text-paper;
+    }
+    & h3 {
+      @apply mt-10 scroll-mt-24 text-[1.0625rem] font-semibold text-paper;
+    }
+    & p,
+    & ul,
+    & ol {
+      @apply mt-5;
+    }
+    & ul {
+      @apply list-disc ps-5;
+    }
+    & ol {
+      @apply list-decimal ps-5;
+    }
+    & li {
+      @apply mt-2;
+    }
+    & li::marker {
+      @apply text-hair;
+    }
+    & strong {
+      @apply font-medium text-paper;
+    }
+    & a {
+      @apply rounded-sm text-mint underline decoration-mint/40 underline-offset-4 transition-colors hover:decoration-mint focus-visible:ring-2 focus-visible:ring-mint focus-visible:outline-none;
+    }
+    /* A term, a path, a flag — but not a whole block, which CodeNode owns.
+       clone so a two-word term that wraps gets a box on each line rather than
+       one box sliced open at the line break. */
+    & :not(pre) > code {
+      @apply rounded-md border border-hair bg-raised px-1.5 py-0.5 font-mono text-[0.8125rem] text-sand;
+      box-decoration-break: clone;
+      -webkit-box-decoration-break: clone;
+    }
+    & > :first-child {
+      @apply mt-0;
+    }
   }
 }
 

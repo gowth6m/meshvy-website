@@ -100,7 +100,7 @@ export default function Hero() {
                 </a>
               </Button>
               <Button asChild size="lg" variant="outline">
-                <a href="#model">See how it works</a>
+                <a href="#features">See how it works</a>
               </Button>
             </div>
           </div>

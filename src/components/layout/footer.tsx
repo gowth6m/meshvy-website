@@ -1,14 +1,19 @@
+import Link from "next/link"
+
 import Mark from "@/components/brand/mark"
 import { site } from "@/lib/site"
 import { externalLink } from "@/lib/utils"
 
 const columns = [
   {
+    // The nav keeps four entries; the footer is where the sections the
+    // Features link covers get named one by one.
     heading: "Meshvy",
     links: [
       { label: "The model", href: "#model" },
       { label: "Delegation", href: "#delegation" },
       { label: "The board", href: "#board" },
+      { label: "Built for Mac", href: "#mac" },
       { label: "Safety", href: "#safety" },
       { label: "Install", href: "#install" },
     ],
@@ -17,6 +22,8 @@ const columns = [
     heading: "Source",
     links: [
       { label: "GitHub", href: site.repo, external: true },
+      { label: "Docs", href: site.docs },
+      { label: "Changelog", href: site.changelog, external: true },
       { label: "Releases", href: site.releases, external: true },
       { label: "Licence", href: site.licence, external: true },
     ],
@@ -45,19 +52,31 @@ export default function Footer() {
               {/* The same label as every eyebrow; font-normal undoes the base h2 weight. */}
               <h2 className="eyebrow font-normal">{column.heading}</h2>
               <ul className="mt-4 space-y-2.5">
-                {column.links.map((link) => (
-                  <li key={link.label}>
-                    <a
-                      href={link.href}
-                      {...("external" in link && link.external
-                        ? externalLink(link.label)
-                        : {})}
-                      className="rounded-sm text-sm text-slate transition-colors hover:text-paper focus-visible:ring-2 focus-visible:ring-mint focus-visible:outline-none"
-                    >
-                      {link.label}
-                    </a>
-                  </li>
-                ))}
+                {column.links.map((link) => {
+                  const className =
+                    "rounded-sm text-sm text-slate transition-colors hover:text-paper focus-visible:ring-2 focus-visible:ring-mint focus-visible:outline-none"
+                  const external = "external" in link && link.external
+
+                  return (
+                    <li key={link.label}>
+                      {/* A route goes through next/link; a hash and anything
+                          off-site stay plain anchors. */}
+                      {!external && link.href.startsWith("/") ? (
+                        <Link href={link.href} className={className}>
+                          {link.label}
+                        </Link>
+                      ) : (
+                        <a
+                          href={link.href}
+                          {...(external ? externalLink(link.label) : {})}
+                          className={className}
+                        >
+                          {link.label}
+                        </a>
+                      )}
+                    </li>
+                  )
+                })}
               </ul>
             </nav>
           ))}

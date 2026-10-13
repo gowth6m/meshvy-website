@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { ArrowDownIcon, ArrowUpRightIcon, MenuIcon } from "lucide-react"
 
 import Mark, { Wordmark } from "@/components/brand/mark"
@@ -13,11 +14,13 @@ import {
 import { site } from "@/lib/site"
 import { externalLink } from "@/lib/utils"
 
+// Two on-page sections and two destinations. The changelog is the
+// repository's own — see site.ts — so it carries the page's external mark.
 const links = [
-  { label: "The model", href: "#model" },
-  { label: "Delegation", href: "#delegation" },
-  { label: "The board", href: "#board" },
-  { label: "Safety", href: "#safety" },
+  { label: "Features", href: "#features" },
+  { label: "Built for Mac", href: "#mac" },
+  { label: "Docs", href: site.docs },
+  { label: "Changelog", href: site.changelog, external: true },
 ]
 
 export default function Navbar() {
@@ -31,7 +34,7 @@ export default function Navbar() {
       >
         {/* flex, not block: an inline-flex link would sit on the text baseline
             and leave the strut's descender below it, riding a few px high. */}
-        <div className="flex flex-1 items-center">
+        <div className="flex items-center">
           <a
             href="#main-content"
             aria-label={`${site.name} home`}
@@ -41,20 +44,25 @@ export default function Navbar() {
           </a>
         </div>
 
-        <ul className="hidden items-center gap-7 text-sm text-slate lg:flex">
+        {/* The row is wider than it was, so the links take the slack rather
+            than sitting between two equal flex-1 halves that squeeze them. */}
+        <ul className="hidden flex-1 items-center justify-center gap-6 text-sm text-slate lg:flex">
           {links.map((link) => (
             <li key={link.href}>
-              <a
-                href={link.href}
-                className="rounded-sm transition-colors duration-200 hover:text-paper focus-visible:ring-2 focus-visible:ring-mint focus-visible:outline-none"
+              <NavLink
+                link={link}
+                className="inline-flex items-center gap-1 rounded-sm whitespace-nowrap transition-colors duration-200 hover:text-paper focus-visible:ring-2 focus-visible:ring-mint focus-visible:outline-none"
               >
                 {link.label}
-              </a>
+                {link.external && (
+                  <ArrowUpRightIcon className="size-3 text-slate/60" />
+                )}
+              </NavLink>
             </li>
           ))}
         </ul>
 
-        <div className="flex flex-1 items-center justify-end gap-1">
+        <div className="flex items-center justify-end gap-1">
           {/* Everything inside the pill is round, so nothing reads as bolted on. */}
           <Button
             asChild
@@ -68,7 +76,7 @@ export default function Navbar() {
             </a>
           </Button>
           <Button asChild size="sm" className="rounded-full">
-            <a href="#install">Install</a>
+            <a href={site.download}>Download</a>
           </Button>
 
           <Sheet>
@@ -95,12 +103,15 @@ export default function Navbar() {
                   (link) => (
                     <li key={link.href} className="border-b border-hair">
                       <SheetClose asChild>
-                        <a
-                          href={link.href}
-                          className="block py-4 font-display text-2xl font-semibold tracking-[-0.03em]"
+                        <NavLink
+                          link={link}
+                          className="flex items-center gap-2 py-4 font-display text-2xl font-semibold tracking-[-0.03em]"
                         >
                           {link.label}
-                        </a>
+                          {"external" in link && link.external && (
+                            <ArrowUpRightIcon className="size-4 text-slate" />
+                          )}
+                        </NavLink>
                       </SheetClose>
                     </li>
                   )
@@ -130,5 +141,43 @@ export default function Navbar() {
         </div>
       </nav>
     </header>
+  )
+}
+
+// A hash stays an anchor; a route goes through next/link so the docs are
+// prefetched and arrive without a reload; anything off-site announces itself.
+function NavLink({
+  link,
+  className,
+  children,
+  ...props
+}: {
+  link: { label: string; href: string; external?: boolean }
+} & React.ComponentProps<"a">) {
+  if (link.external) {
+    return (
+      <a
+        href={link.href}
+        className={className}
+        {...externalLink(link.label)}
+        {...props}
+      >
+        {children}
+      </a>
+    )
+  }
+
+  if (link.href.startsWith("/")) {
+    return (
+      <Link href={link.href} className={className} {...props}>
+        {children}
+      </Link>
+    )
+  }
+
+  return (
+    <a href={link.href} className={className} {...props}>
+      {children}
+    </a>
   )
 }
