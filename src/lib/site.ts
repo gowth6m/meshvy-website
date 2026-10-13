@@ -11,6 +11,12 @@ export const site = {
   repoName: "meshvy",
   repo: "https://github.com/gowth6m/meshvy",
   releases: "https://github.com/gowth6m/meshvy/releases",
+  // The docs are a section of this site; the changelog is still the
+  // repository's own, because a second place to write it is a second place to
+  // forget. readme is for the few links that genuinely mean "the source".
+  docs: "/docs",
+  readme: "https://github.com/gowth6m/meshvy#readme",
+  changelog: "https://github.com/gowth6m/meshvy/blob/main/CHANGELOG.md",
   licence: "https://github.com/gowth6m/meshvy/blob/main/LICENSE",
   claudeCode: "https://claude.com/claude-code",
   /**
