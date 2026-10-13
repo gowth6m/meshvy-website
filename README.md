@@ -47,8 +47,8 @@ Then open [http://localhost:3000](http://localhost:3000).
 The structural idea is that the page is the app's canvas. `.canvas` paints the
 dot field, `.node` is the card chrome (hairline, panel fill, title bar), and
 `.bloom` is the mint glow under a board. `WorkspaceDiagram` draws a real
-workspace node with SVG edges down to one worktree per repository; the edges
-draw themselves once when the section comes into view.
+workspace node, with a chip for each repository it holds — the app gives a
+repository no node of its own, so neither does the page.
 
 ### Images
 

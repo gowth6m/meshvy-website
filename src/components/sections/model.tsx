@@ -74,7 +74,7 @@ export default function Model() {
           <Reveal delay={0.08} className="order-1 lg:order-2">
             <WorkspaceDiagram />
             <p className="mt-4 text-center font-mono text-[0.6875rem] text-slate">
-              the workspace node, and an edge to every repo beneath it
+              the workspace node, with a chip for every repo it holds
             </p>
           </Reveal>
         </div>

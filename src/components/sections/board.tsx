@@ -1,24 +1,26 @@
 import Image from "next/image"
-import { FolderGitIcon, GlobeIcon, TerminalIcon } from "lucide-react"
+import { GlobeIcon, HistoryIcon, TerminalIcon } from "lucide-react"
 
 import FeatureRow from "@/components/elements/feature-row"
 import Reveal from "@/components/elements/reveal"
 import SectionHeading from "@/components/elements/section-heading"
 
+// What the board is made of. A repository is not on this list: it is a chip
+// on its workspace node, and the board is for what runs in it.
 const sources = [
   {
-    icon: TerminalIcon,
+    icon: HistoryIcon,
     name: "Session cards",
     source: "~/.claude/projects",
     detail:
       "Title, folder, branch, model, prompts sent, tool calls, context size at the last turn, and last activity.",
   },
   {
-    icon: FolderGitIcon,
-    name: "Worktree cards",
-    source: "git worktree list",
+    icon: TerminalIcon,
+    name: "Terminal nodes",
+    source: "a real pty",
     detail:
-      "Branch, dirty and untracked counts, divergence from upstream, and the tip commit.",
+      "The orchestrator, the agents it dispatches, and plain shells — each one you can read, interrupt and type into.",
   },
   {
     icon: GlobeIcon,
@@ -64,7 +66,7 @@ export default function Board() {
           <SectionHeading
             eyebrow="on the canvas"
             title="The board reads your machine, not your memory."
-            lede="Nothing on it is a thing you have to keep in sync. Cards come from the transcripts Claude Code already writes and from git itself, and they refresh as the files underneath them change."
+            lede="Nothing on it is a thing you have to keep in sync. Cards come from the transcripts Claude Code already writes, each repository's state from git itself, and all of it refreshes as the files underneath change."
           />
         </Reveal>
 
@@ -97,8 +99,9 @@ export default function Board() {
           }}
         >
           <p>
-            Select a repository to see what it has touched against HEAD —
-            modified, added, deleted, renamed, untracked — with per-file{" "}
+            Select a repository — its chip on the workspace node, or its row in
+            the sidebar — to see what it has touched against HEAD: modified,
+            added, deleted, renamed, untracked, with per-file{" "}
             <span className="font-mono text-mint">+</span>
             <span className="font-mono text-destructive">−</span> counts and a
             unified diff showing both line numbers.
