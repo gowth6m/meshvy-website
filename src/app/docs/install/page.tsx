@@ -98,7 +98,7 @@ export default function Page() {
       <p>
         Meshvy opens empty — there is no sample project and nothing is created
         until you make a workspace. Claude Code asks you to trust a folder it
-        has not seen, so the first orchestrator in a new workspace shows its
+        has not seen, so the first coordinator in a new workspace shows its
         trust prompt. Press Enter.
       </p>
 

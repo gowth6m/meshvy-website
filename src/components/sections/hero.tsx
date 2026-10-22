@@ -129,7 +129,7 @@ export default function Hero() {
           <figure className="node overflow-hidden p-1.5 md:p-2">
             <Image
               src="/shots/board.png"
-              alt="The Meshvy canvas: a payments-revamp workspace across the api, web and worker repositories, an orchestrator delegating to two agents, and a browser node running the app they are changing."
+              alt="The Meshvy canvas: a payments-revamp workspace across the api, web and worker repositories, the coordinator with threads working in two of them, and a browser node running the app they are changing."
               width={3200}
               height={1520}
               priority

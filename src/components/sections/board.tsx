@@ -20,7 +20,7 @@ const sources = [
     name: "Terminal nodes",
     source: "a real pty",
     detail:
-      "The orchestrator, the agents it dispatches, and plain shells — each one you can read, interrupt and type into.",
+      "The coordinator, the threads it starts, and plain shells — each one you can read, interrupt and type into.",
   },
   {
     icon: GlobeIcon,
@@ -109,7 +109,7 @@ export default function Board() {
           <p>
             Select the workspace node instead and you get the same list across
             every repository at once, which is the view you actually want after
-            an orchestrator run.
+            a coordinator run.
           </p>
         </FeatureRow>
 

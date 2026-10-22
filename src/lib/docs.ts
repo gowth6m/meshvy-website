@@ -52,11 +52,11 @@ export const docsNav: DocsGroup[] = [
           "How a Meshvy workspace cuts one branch across several repositories as git worktrees.",
       },
       {
-        title: "Agents",
+        title: "Coordinator and threads",
         href: "/docs/agents",
-        lede: "The orchestrator, the agents it dispatches, and the helper it delegates through.",
+        lede: "The main chat, the threads it starts for each piece of work, and the helper it starts them with.",
         description:
-          "How Meshvy runs an orchestrator and per-repository Claude Code agents, each in a real terminal.",
+          "How Meshvy runs a coordinator and a Claude Code thread for each piece of work, each in a real terminal.",
       },
       {
         title: "The board",

@@ -16,38 +16,38 @@ const HREF = "/docs/agents"
 
 const commands = [
   {
-    command: 'meshvy spawn <repo> "<task>"',
-    detail: "start an agent there; prints an agent id",
-  },
-  {
-    command: "meshvy wait <id>",
-    detail: "block until it finishes, print what it reported",
+    command: 'meshvy thread "<title>" "<task>" [--repo <repo>]',
+    detail: "start a thread; prints its id",
   },
   {
     command: 'meshvy send <id> "<message>"',
-    detail: "type a follow-up into its terminal",
+    detail: "a follow-up to that thread",
+  },
+  {
+    command: "meshvy threads",
+    detail: "every thread and where it stands",
   },
   {
     command: "meshvy context <id>",
-    detail: "read what another agent has been doing",
+    detail: "read what a thread has been doing, without interrupting it",
   },
   {
-    command: "meshvy status",
-    detail: "every agent on the board and its state",
+    command: "meshvy wait <id>",
+    detail: "block until it finishes its turn, print its report",
   },
-  { command: "meshvy list", detail: "the repositories this workspace holds" },
+  { command: "meshvy resolve <id>", detail: "put a finished thread away" },
 ]
 
 const kinds = [
   {
-    name: "The orchestrator",
+    name: "The coordinator",
     detail:
-      "Runs at the workspace root, with every repository as a subdirectory beneath it. ⇧⌘T starts it or focuses the one already running.",
+      "The workspace’s main chat, on the workspace node at the workspace root. You tell it what you want; it starts a thread for each piece of work and reports back. ⇧⌘T starts it or focuses the one already running.",
   },
   {
-    name: "A per-repo agent",
+    name: "A thread",
     detail:
-      "Spawned by the orchestrator or by you, with one repository as its working directory. Right-click a repository chip or its row in the sidebar.",
+      "One piece of work with its own Claude Code agent, in one repository or at the workspace root. Started by the coordinator, or by you with + on the Threads list or a right-click on a repository.",
   },
   {
     name: "A plain shell",
@@ -56,17 +56,26 @@ const kinds = [
   },
 ]
 
+const states = [
+  { name: "Needs you", detail: "stopped on a question only you can answer" },
+  { name: "Ready", detail: "finished a turn and reported back" },
+  { name: "Working", detail: "in the middle of a turn" },
+  { name: "Idle", detail: "at its prompt with nothing new to say" },
+  { name: "Stopped", detail: "its process has gone; restart it to carry on" },
+]
+
 export const metadata: Metadata = docsMetadata(HREF)
 
 export default function Page() {
   return (
     <DocPage href={HREF}>
       <p>
-        Open Claude Code on the workspace node and every repository is a
-        subdirectory beneath it, so one orchestrator can put a real agent — with
-        its own terminal — on each of them. When it splits the work up, each
-        teammate is a full Claude Code session you can read, interrupt and
-        answer.
+        A workspace works the way a project does in Claude Code. The{" "}
+        <strong>coordinator</strong> is its one main chat: you ask for things
+        there, and it hands each piece of work to a <strong>thread</strong> — a
+        full Claude Code session with its own terminal you can read, interrupt
+        and answer. It sends follow-ups to the thread that owns the work and
+        tells you, in a line or two, how each one went.
       </p>
 
       <h2 id="kinds">Three kinds of terminal</h2>
@@ -81,11 +90,37 @@ export default function Page() {
         ))}
       </dl>
 
-      <h2 id="delegating">How it delegates</h2>
+      <h2 id="threads">Threads</h2>
       <p>
-        Meshvy puts a <code>meshvy</code> helper on the orchestrator&rsquo;s
-        PATH. It is the whole interface between an agent and the board, and it
-        is the same one you could run yourself in any terminal in the workspace.
+        One thread per piece of work, not one per repository. Each has a short
+        title, and the sidebar lists them under the coordinator with where each
+        one stands, whatever wants you sorted first:
+      </p>
+      <dl className="mt-6 flex flex-col gap-3">
+        {states.map((state) => (
+          <div key={state.name} className="flex gap-3">
+            <dt className="w-24 shrink-0 font-semibold text-paper">
+              {state.name}
+            </dt>
+            <dd>{state.detail}</dd>
+          </div>
+        ))}
+      </dl>
+      <p>
+        When a thread finishes a turn or needs a decision, Meshvy tells the
+        coordinator with a one-line note starting <code>[meshvy]</code>, so it
+        can pass on what matters without you watching every terminal. When the
+        work is done, <strong>resolve</strong> the thread: it folds away under
+        Resolved, nothing is stopped or deleted, and writing to it again reopens
+        it.
+      </p>
+
+      <h2 id="delegating">How the coordinator starts threads</h2>
+      <p>
+        Meshvy puts a <code>meshvy</code> helper on the coordinator&rsquo;s
+        PATH. It is the whole interface between the coordinator and the board,
+        and it is the same one you could run yourself in any terminal in the
+        workspace.
       </p>
 
       <div className="mt-6 overflow-hidden rounded-xl border border-hair bg-panel">
@@ -108,6 +143,10 @@ export default function Page() {
           </TableBody>
         </Table>
       </div>
+      <p>
+        <code>meshvy spawn &lt;repo&gt; &quot;&lt;task&gt;&quot;</code> and{" "}
+        <code>meshvy status</code>, from before threads, still work.
+      </p>
 
       <h2 id="not-sub-agents">Why not Claude&rsquo;s own Agent tool</h2>
       <p>
@@ -119,7 +158,7 @@ export default function Page() {
         something you can type into.
       </p>
 
-      <h2 id="status">Knowing what an agent is doing</h2>
+      <h2 id="status">Knowing what a thread is doing</h2>
       <p>
         Status comes from the agent itself, not from reading its screen. Every
         session Meshvy starts is handed hooks that report what it is doing, so a
@@ -128,7 +167,7 @@ export default function Page() {
         finished.
       </p>
       <p>
-        An agent that needs you is marked unread — a dot on its header and in
+        A thread that needs you is marked unread — a dot on its header and in
         the sidebar, a count on the Dock icon, and a notification if you turn
         them on. <strong>⌥⌘N</strong> walks you through whoever is waiting.
       </p>
@@ -136,8 +175,8 @@ export default function Page() {
       <h2 id="model">Model, effort and permission mode</h2>
       <p>
         All three sit in one menu: on the pill in the toolbar, and on every
-        agent card. Whatever you pick is what the next agent starts with, and it
-        is remembered for next time.
+        thread card. Whatever you pick is what the next thread starts with, and
+        it is remembered for next time.
       </p>
       <p>
         On a card it also retunes that session where the CLI allows it.{" "}
@@ -146,13 +185,14 @@ export default function Page() {
         session, or restart the agent from the same menu.
       </p>
 
-      <CodeNode title="on the orchestrator's PATH" className="mt-8">
+      <CodeNode title="on the coordinator's PATH" className="mt-8">
         <span className="text-slate">$ </span>
-        <span className="text-paper">meshvy spawn </span>
-        <span className="text-sand">api </span>
-        <span className="text-mint">&quot;add the refunds endpoint&quot;</span>
+        <span className="text-paper">meshvy thread </span>
+        <span className="text-mint">&quot;Refunds endpoint&quot; </span>
+        <span className="text-mint">&quot;add the refunds endpoint&quot; </span>
+        <span className="text-sand">--repo api</span>
         {"\n"}
-        <span className="text-slate">agent_7f21 started in api</span>
+        <span className="text-slate">7f21c0a9e4</span>
       </CodeNode>
     </DocPage>
   )

@@ -69,10 +69,10 @@ export default function Page() {
       <h2 id="the-node">The workspace node</h2>
       <p>
         The workspace is a node on the canvas, and the parent of everything else
-        on it. It names the branch, hosts the orchestrator&rsquo;s Claude Code
-        session in its own body — the working directory <em>is</em> that folder
-        — and shows a chip per repository, marked when that one has uncommitted
-        work.
+        on it. It names the branch, hosts the coordinator — the
+        workspace&rsquo;s main chat — in its own body — the working directory{" "}
+        <em>is</em> that folder — and shows a chip per repository, marked when
+        that one has uncommitted work.
       </p>
       <p>
         A repository has no node of its own: its chip is where it lives on the

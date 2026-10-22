@@ -54,10 +54,10 @@ export default function Page() {
           <code>git worktree</code>, all under one folder.
         </li>
         <li>
-          <strong>Every agent is a terminal you can type into.</strong> The
-          orchestrator runs at the workspace root, with every repository as a
-          subdirectory beneath it, and delegates to per-repository agents you
-          can read, interrupt and answer.
+          <strong>One main chat, a thread for every piece of work.</strong> The
+          coordinator runs at the workspace root and takes your requests. It
+          starts a thread for each piece of work — an agent with its own
+          terminal you can read, interrupt and answer — and reports back.
         </li>
         <li>
           <strong>The board reads your machine.</strong> Nodes are drawn from
