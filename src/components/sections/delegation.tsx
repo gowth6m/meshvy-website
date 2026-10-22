@@ -4,26 +4,22 @@ import SectionHeading from "@/components/elements/section-heading"
 
 const commands = [
   {
-    verb: "spawn",
-    args: '<repo> "<task>"',
-    note: "start an agent there; prints an agent id",
-  },
-  {
-    verb: "wait",
-    args: "<id>",
-    note: "block until it finishes, print what it reported",
+    verb: "thread",
+    args: '"<title>" "<task>"',
+    note: "start a thread; prints its id",
   },
   {
     verb: "send",
     args: '<id> "<message>"',
-    note: "type a follow-up into its terminal",
+    note: "a follow-up to that thread",
   },
+  { verb: "threads", args: "", note: "every thread and where it stands" },
   {
     verb: "context",
     args: "<id>",
-    note: "read what another agent has been doing",
+    note: "read what a thread has been doing",
   },
-  { verb: "status", args: "", note: "every agent on the board and its state" },
+  { verb: "resolve", args: "<id>", note: "put a finished thread away" },
 ]
 
 const PAD = Math.max(
@@ -32,14 +28,14 @@ const PAD = Math.max(
 
 const kinds = [
   {
-    name: "The orchestrator",
+    name: "The coordinator",
     detail:
-      "Runs at the workspace root, with every repository as a subdirectory beneath it.",
+      "The main chat, at the workspace root. You ask; it starts a thread for each piece of work and reports back.",
   },
   {
-    name: "A per-repo agent",
+    name: "A thread",
     detail:
-      "Spawned by the orchestrator or by you, with one repository as its working directory.",
+      "One piece of work with its own agent, in one repository or across the workspace. Resolve it when it is done.",
   },
   {
     name: "A plain shell",
@@ -55,13 +51,13 @@ export default function Delegation() {
         <Reveal>
           <SectionHeading
             eyebrow="delegation"
-            title="Every delegated agent is a terminal you can type into."
-            lede="When the orchestrator splits the work up, each teammate is a full Claude Code session with its own terminal node — one you can read, interrupt and answer. It delegates through a helper Meshvy puts on its PATH."
+            title="One main chat. A thread for every piece of work."
+            lede="It works the way a project does in Claude Code. You ask the coordinator; it starts a thread for each piece of work — a full Claude Code session with its own terminal you can read, interrupt and answer — and tells you briefly how each one went."
           />
         </Reveal>
 
         <Reveal delay={0.06} className="heading-gap">
-          <CodeNode title="on the orchestrator's PATH">
+          <CodeNode title="on the coordinator's PATH">
             {commands.map(({ verb, args, note }) => {
               const call = `${verb} ${args}`.trimEnd()
               return (
@@ -105,7 +101,7 @@ export default function Delegation() {
                 Every session Meshvy starts is handed hooks that report what it
                 is doing. A node carries a strip under its header with the tool
                 in flight, the permission it is blocked on, or the first line of
-                what it said when it finished. An agent that needs you is marked
+                what it said when it finished. A thread that needs you is marked
                 unread — on its header, in the sidebar, and on the Dock icon.{" "}
                 <kbd className="chip text-paper">⌥⌘N</kbd> walks you through
                 whoever is waiting.

@@ -24,7 +24,7 @@ const nodes = [
     icon: SquareDashedIcon,
     name: "The workspace node",
     detail:
-      "Hosts the orchestrator's session in its own body and names every repository under it, a chip each, marked when it has uncommitted work.",
+      "Hosts the coordinator, the workspace's main chat, in its own body and names every repository under it, a chip each, marked when it has uncommitted work.",
   },
   {
     icon: TerminalIcon,
@@ -85,8 +85,7 @@ export default function Page() {
       </p>
       <p>
         Select the workspace node instead and you get the same list across every
-        repository at once, which is the view you want after an orchestrator
-        run.
+        repository at once, which is the view you want after a coordinator run.
       </p>
 
       <figure className="node mt-8 overflow-hidden p-1">

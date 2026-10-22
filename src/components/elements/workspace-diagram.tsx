@@ -30,7 +30,7 @@ export default function WorkspaceDiagram({
 
   return (
     <div ref={root} className={cn("canvas rounded-2xl p-5 md:p-7", className)}>
-      {/* The orchestrator runs in here, at the workspace root. */}
+      {/* The coordinator runs in here, at the workspace root. */}
       <div className="node">
         <div className="node-bar">
           <Mark className="size-4" live={inView && !reduceMotion} />
@@ -40,7 +40,7 @@ export default function WorkspaceDiagram({
               aria-hidden
               className="size-1.5 rounded-full bg-mint shadow-[0_0_8px_1px] shadow-mint/50"
             />
-            orchestrator
+            coordinator
           </span>
         </div>
         <div className="px-4 py-3.5">
